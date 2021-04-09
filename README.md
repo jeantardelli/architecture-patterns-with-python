@@ -3,7 +3,7 @@
 [![Stars](https://img.shields.io/github/stars/jeantardelli/architecture-patterns-with-python)]()
 [![MIT License](https://img.shields.io/github/license/jeantardelli/architecture-patterns-with-python)](LICENSE)
 
-# architecture-patterns-with-python
+# Architecture Patterns with Python
 
 This repository contains code based on the lessons and teachings of the guide [Architecture Patterns with Python, Enabling Test-Driven Development, Domain-Driven Design, and Event-Driven Microservices](https://github.com/cosmicpython/code/branches/all).
 
