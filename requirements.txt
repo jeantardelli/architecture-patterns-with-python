@@ -1,2 +1,5 @@
 pytest
 sqlalchemy
+flask
+requests
+mysql-connector-python

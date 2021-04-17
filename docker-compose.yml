@@ -1,0 +1,24 @@
+version: "3"
+services:
+
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        depends_on:
+            - mysql
+        environment:
+            - DB_HOST=mysql
+            - DB_PASSWORD=abc123
+        volumes:
+            - ./:/code
+        ports:
+            - "5005:80"
+
+    mysql:
+        image: mysql
+        environment:
+            - MYSQL_USER=allocation
+            - MYSQL_PASS=abc123
+        ports:
+            - "54321:5432"

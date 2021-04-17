@@ -4,7 +4,3 @@ python: 3.8
 
 script:
 - make test
-
-branches:
-    except:
-    - /.*_exercise$/
