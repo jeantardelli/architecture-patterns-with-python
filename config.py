@@ -1,10 +1,10 @@
 import os
 
 def get_mysql_uri():
-    host = os.environ.get("DB_HOST", "localhost")
-    port = 33060 if host == "localhost" else 33060
-    password = os.environ.get("DB_PASS", "abc123")
-    user, db_name = "allocation", "allocation"
+    host = os.environ.get("MYSQL_HOST", "localhost")
+    port = 33060 if host == "localhost" else 3306
+    password = os.environ.get("MYSQL_PASSWORD", "abc123")
+    user, db_name = "root", "allocation"
     return f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{db_name}"
 
 def get_api_url():

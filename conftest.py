@@ -25,7 +25,7 @@ def session(in_memory_db):
     clear_mappers()
 
 def wait_for_mysql_to_come_up(engine):
-    deadline = time.time() + 10
+    deadline = time.time() + 20
     while time.time() < deadline:
         try:
             return engine.connect()

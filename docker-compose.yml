@@ -8,9 +8,8 @@ services:
         depends_on:
             - mysql
         environment:
-            - DB_HOST=mysql
-            - DB_PASSWORD=abc123
-            - PYTHONDONTWRITEBYTECODE=1
+            - MYSQL_HOST=mysql
+            - MYSQL_PASSWORD=abc123
         volumes:
             - ./:/code
         ports:
@@ -19,7 +18,7 @@ services:
     mysql:
         image: mysql
         environment:
-            - MYSQL_USER=allocation
-            - MYSQL_PASS=abc123
+            - MYSQL_ROOT_PASSWORD=abc123
+            - MYSQL_DATABASE=allocation
         ports:
             - "33060:3306"
