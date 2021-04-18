@@ -10,6 +10,7 @@ services:
         environment:
             - DB_HOST=mysql
             - DB_PASSWORD=abc123
+            - PYTHONDONTWRITEBYTECODE=1
         volumes:
             - ./:/code
         ports:
@@ -21,4 +22,4 @@ services:
             - MYSQL_USER=allocation
             - MYSQL_PASS=abc123
         ports:
-            - "54321:5432"
+            - "33060:3306"

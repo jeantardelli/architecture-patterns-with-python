@@ -8,13 +8,13 @@ build:
 	docker-compose build
 
 up:
-	docker-compose p -d app
+	docker-compose up -d app
 
 down:
 	docker-compose down
 
 logs:
-	docker-compose logs app | -100
+	docker-compose logs app | tail -100
 
 test:
 	pytest --tb=short
