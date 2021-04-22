@@ -1,15 +1,17 @@
 # pylint: disable=redefined-outer-name
 import time
+from pathlib import Path
+
 import pytest
 import requests
-import config
 
 from requests.exceptions import ConnectionError
-from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker, clear_mappers
-from orm import metadata, start_mappers
+
+from adapters.orm import metadata, start_mappers
+import config
 
 @pytest.fixture
 def in_memory_db():
@@ -58,39 +60,7 @@ def mysql_session(mysql_db):
     clear_mappers()
 
 @pytest.fixture
-def add_stock(mysql_session):
-    batches_added = set()
-    skus_added = set()
-
-    def _add_stock(lines):
-        for ref, sku, qty, eta in lines:
-            mysql_session.execute(
-                "INSERT INTO batches (reference, sku, _purchased_quantity, eta)"
-                " VALUES (:ref, :sku, :qty, :eta)",
-                dict(ref=ref, sku=sku, qty=qty, eta=eta),)
-            [[batch_id]] = mysql_session.execute(
-                "SELECT id FROM batches WHERE reference=:ref AND sku=:sku",
-                dict(ref=ref, sku=sku),)
-            batches_added.add(batch_id)
-            skus_added.add(sku)
-        mysql_session.commit()
-
-    yield _add_stock
-
-    for batch_id in batches_added:
-        mysql_session.execute(
-            "DELETE FROM allocations WHERE batch_id=@batch_id",
-            dict(batch_id=batch_id),)
-        mysql_session.execute(
-            "DELETE FROM batches WHERE id=@batch_id", dict(batch_id=batch_id),)
-
-    for sku in skus_added:
-        mysql_session.execute(
-            "DELETE FROM order_lines WHERE sku=@sku", dict(sku=sku),)
-        mysql_session.commit()
-
-@pytest.fixture
 def restart_api():
-    (Path(__file__).parent / "flask_app.py").touch()
+    (Path(__file__).parent / "../entrypoints/flask_app.py").touch()
     time.sleep(0.5)
     wait_for_webapp_to_come_up()
