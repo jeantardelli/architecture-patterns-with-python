@@ -2,6 +2,7 @@
 [![Forks](https://img.shields.io/github/forks/jeantardelli/architecture-patterns-with-python)]()
 [![Stars](https://img.shields.io/github/stars/jeantardelli/architecture-patterns-with-python)]()
 [![MIT License](https://img.shields.io/github/license/jeantardelli/architecture-patterns-with-python)](LICENSE)
+[![Build Status](https://travis-ci.com/jeantardelli/architecture-patterns-with-python.svg?branch=main)](https://travis-ci.com/jeantardelli/architecture-patterns-with-python)
 
 # Architecture Patterns with Python
 
