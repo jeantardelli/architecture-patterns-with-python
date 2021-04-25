@@ -10,8 +10,11 @@ services:
         environment:
             - MYSQL_HOST=mysql
             - MYSQL_PASSWORD=abc123
+            - API_HOST=app
+            - PYTHONDONTWRITEBYTECODE=1
         volumes:
-            - ./:/code
+            - ./src:/src
+            - ./tests:/tests
         ports:
             - "5005:80"
 
