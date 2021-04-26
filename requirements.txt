@@ -1,5 +1,11 @@
-pytest
+# app
+
 sqlalchemy
 flask
-requests
 mysql-connector-python
+
+# tests
+pytest
+pytest-icdiff
+mypy
+requests
