@@ -20,7 +20,7 @@ unit-tests:
 	docker-compose run --rm --no-deps --entrypoint=pytest app /tests/unit
 
 integration-tests: up
-	docker-compose run --rm --no-deps --entrypoint=pytest app /tests/e2e
+	docker-compose run --rm --no-deps --entrypoint=pytest app /tests/integration
 
 e2e-tests:
 	docker-compose run --rm --no-deps --entrypoint=pytest app /tests/e2e

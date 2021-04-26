@@ -40,7 +40,7 @@ def wait_for_mysql_to_come_up(engine):
     pytest.fail("MySQL never came up")
 
 def wait_for_webapp_to_come_up():
-    deadline = time.time() + 10
+    deadline = time.time() + 20
     url = config.get_api_url()
     while time.time() < deadline:
         try:
@@ -49,7 +49,7 @@ def wait_for_webapp_to_come_up():
             time.sleep(0.5)
     pytest.fail("API never came up")
 
-@pytest.fixture(scope="session")
+@pytest.fixture()
 def mysql_db():
     engine = create_engine(config.get_mysql_uri())
     wait_for_mysql_to_come_up(engine)

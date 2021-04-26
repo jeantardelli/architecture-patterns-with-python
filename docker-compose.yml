@@ -10,8 +10,8 @@ services:
         environment:
             - MYSQL_HOST=mysql
             - MYSQL_PASSWORD=abc123
-            - API_HOST=app
             - PYTHONDONTWRITEBYTECODE=1
+            - API_HOST=app
         volumes:
             - ./src:/src
             - ./tests:/tests
@@ -19,7 +19,7 @@ services:
             - "5005:80"
 
     mysql:
-        image: mysql
+        image: mysql:5.7
         environment:
             - MYSQL_ROOT_PASSWORD=abc123
             - MYSQL_DATABASE=allocation
