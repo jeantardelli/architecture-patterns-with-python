@@ -7,7 +7,7 @@ import requests
 
 from requests.exceptions import ConnectionError
 from sqlalchemy import create_engine
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, DatabaseError
 from sqlalchemy.orm import sessionmaker, clear_mappers
 
 from allocation.adapters.orm import metadata, start_mappers
@@ -35,7 +35,7 @@ def wait_for_mysql_to_come_up(engine):
     while time.time() < deadline:
         try:
             return engine.connect()
-        except OperationalError:
+        except (OperationalError, DatabaseError):
             time.sleep(0.5)
     pytest.fail("MySQL never came up")
 
@@ -49,7 +49,7 @@ def wait_for_webapp_to_come_up():
             time.sleep(0.5)
     pytest.fail("API never came up")
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def mysql_db():
     engine = create_engine(config.get_mysql_uri())
     wait_for_mysql_to_come_up(engine)
