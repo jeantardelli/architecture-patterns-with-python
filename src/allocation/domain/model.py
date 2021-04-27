@@ -6,15 +6,22 @@ from typing import Optional, List, Set
 class OutOfStock(Exception):
     pass
 
-def allocate(line: OrderLine, batches: List[Batch]) -> str:
-    try:
-        batch = next(b for b in sorted(batches) if b.can_allocate(line))
-        batch.allocate(line)
+class Product:
+    def __init__(self, sku: str, batches: List[Batch], version_number: int = 0):
+        self.sku = sku
+        self.batches = batches
+        self.version_number = version_number
 
-        return batch.reference
+    def allocate(self, line: OrderLine) -> str:
+        try:
+            batch = next(b for b in sorted(self.batches) if b.can_allocate(line))
+            batch.allocate(line)
+            self.version_number += 1
 
-    except StopIteration:
-        raise OutOfStock(f"Out of stock for sku {line.sku}")
+            return batch.reference
+
+        except StopIteration:
+            raise OutOfStock(f"Out of stock for sku {line.sku}")
 
 @dataclass(unsafe_hash=True)
 class OrderLine:
