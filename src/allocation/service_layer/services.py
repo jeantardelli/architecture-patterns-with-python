@@ -34,7 +34,7 @@ def allocate(orderid: str,
         product = uow.products.get(sku=line.sku)
         if product is None:
             raise InvalidSku(f"Invalid sku {line.sku}")
-        batchref = model.allocate(line, batches)
+        batchref = product.allocate(line)
         uow.commit()
 
     return batchref
