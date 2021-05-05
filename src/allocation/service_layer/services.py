@@ -9,9 +9,6 @@ from allocation.service_layer import unit_of_work
 class InvalidSku(Exception):
     pass
 
-def is_valid_sku(sku, batches):
-    return sku in {b.sku for b in batches}
-
 def add_batch(ref: str,
               sku: str,
               qty: int,

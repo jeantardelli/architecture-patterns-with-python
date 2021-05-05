@@ -58,10 +58,14 @@ def mysql_db():
     return engine
 
 @pytest.fixture
-def mysql_session(mysql_db):
+def mysql_session_factory(mysql_db):
     start_mappers()
-    yield sessionmaker(bind=mysql_db)()
+    yield sessionmaker(bind=mysql_db)
     clear_mappers()
+
+@pytest.fixture
+def mysql_session(mysql_session_factory):
+    return mysql_session_factory()
 
 @pytest.fixture
 def restart_api():
