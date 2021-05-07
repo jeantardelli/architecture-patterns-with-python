@@ -1,22 +1,8 @@
-import time
-import uuid
 import pytest
 import requests
 
 from allocation import config
-
-def random_suffix():
-    return uuid.uuid4().hex[:6]
-
-def random_sku(name=""):
-    return f"sku-{name}-{random_suffix()}"
-
-def random_batchref(name=""):
-    return f"batch-{name}-{random_suffix()}"
-
-def random_orderid(name=""):
-    return f"order-{name}-{random_suffix()}"
-
+from ..random_refs import random_sku, random_batchref, random_orderid
 
 def post_to_add_batch(ref, sku, qty, eta):
     url = config.get_api_url()
@@ -38,19 +24,17 @@ def test_happy_path_returns_201_and_allocated_batch():
     data = {"orderid": random_orderid(), "sku": sku, "qty": 3}
 
     url = config.get_api_url()
-    time.sleep(10)
     r = requests.post(f"{url}/allocate", json=data)
 
     assert r.status_code == 201
     assert r.json()["batchref"] == earlybatch
- 
+
 @pytest.mark.usefixtures("mysql_db")
 @pytest.mark.usefixtures("restart_api")
 def test_unhappy_path_returns_400_and_error_message():
     unknown_sku, orderid = random_sku(), random_orderid()
     data = {"orderid": orderid, "sku": unknown_sku, "qty": 20}
     url = config.get_api_url()
-    time.sleep(10)
     r = requests.post(f"{url}/allocate", json=data)
 
     assert r.status_code == 400

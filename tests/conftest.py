@@ -15,7 +15,9 @@ from allocation import config
 
 @pytest.fixture
 def in_memory_db():
-    engine = create_engine("sqlite:///:memory:")
+    engine = create_engine("sqlite:///:memory:",
+                           echo=True,
+                           connect_args={"check_same_thread": False})
     metadata.create_all(engine)
 
     return engine
@@ -58,10 +60,14 @@ def mysql_db():
     return engine
 
 @pytest.fixture
-def mysql_session(mysql_db):
+def mysql_session_factory(mysql_db):
     start_mappers()
-    yield sessionmaker(bind=mysql_db)()
+    yield sessionmaker(bind=mysql_db)
     clear_mappers()
+
+@pytest.fixture
+def mysql_session(mysql_session_factory):
+    return mysql_session_factory()
 
 @pytest.fixture
 def restart_api():
