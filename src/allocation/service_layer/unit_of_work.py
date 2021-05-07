@@ -27,7 +27,7 @@ class AbstractUnitOfWork(abc.ABC):
 
 DEFAULT_SESSION_FACTORY = sessionmaker(
     bind=create_engine(config.get_mysql_uri(),
-                       isolation_level="REPEATABLE READ")) 
+                       isolation_level="SERIALIZABLE")) 
 
 class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
     def __init__(self, session_factory=DEFAULT_SESSION_FACTORY):

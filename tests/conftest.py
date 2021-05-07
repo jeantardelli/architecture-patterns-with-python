@@ -15,7 +15,9 @@ from allocation import config
 
 @pytest.fixture
 def in_memory_db():
-    engine = create_engine("sqlite:///:memory:")
+    engine = create_engine("sqlite:///:memory:",
+                           echo=True,
+                           connect_args={"check_same_thread": False})
     metadata.create_all(engine)
 
     return engine

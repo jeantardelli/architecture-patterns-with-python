@@ -39,9 +39,10 @@ def test_uow_can_retrieve_a_batch_and_allocate_to_it(session_factory):
 
     uow = unit_of_work.SqlAlchemyUnitOfWork(session_factory)
     with uow:
-        product = uow.products.get(sku="HISPTER-WORKBENCH")
+        product = uow.products.get(sku="HIPSTER-WORKBENCH")
         line = model.OrderLine("o1", "HIPSTER-WORKBENCH", 10)
         product.allocate(line)
+        time.sleep(0.2)
         uow.commit()
 
     batchref = get_allocated_batch_ref(session, "o1", "HIPSTER-WORKBENCH")
@@ -72,11 +73,12 @@ def test_rolls_back_on_error(session_factory):
 
 def try_to_allocate(orderid, sku, exceptions):
     line = model.OrderLine(orderid, sku, 10)
+    uow = unit_of_work.SqlAlchemyUnitOfWork()
     try:
-        with unit_of_work.SqlAlchemyUnitOfWork() as uow:
+        with uow:
             product = uow.products.get(sku=sku)
             product.allocate(line)
-            time.sleep(0.1)
+            time.sleep(0.5)
             uow.commit()
 
     except Exception as e:
@@ -91,21 +93,18 @@ def test_concurrent_updates_to_version_are_not_allowed(mysql_session_factory):
 
     order1, order2 = random_orderid(1), random_orderid(2)
     exceptions = [] # type: List[Exception]
-    try_to_allocate_order1 = lambda: try_to_allocate(order1, sku, exceptions)
-    try_to_allocate_order2 = lambda: try_to_allocate(order2, sku, exceptions)
+    try_to_allocate_order1 = lambda : try_to_allocate(order1, sku, exceptions)
+    try_to_allocate_order2 = lambda : try_to_allocate(order2, sku, exceptions)
     thread1 = threading.Thread(target=try_to_allocate_order1)
     thread2 = threading.Thread(target=try_to_allocate_order2)
     thread1.start()
     thread2.start()
     thread1.join()
     thread2.join()
-
+    
     [[version]] = session.execute(
         "SELECT version_number FROM products WHERE sku=:sku", dict(sku=sku))
     assert version == 2
-
-    [exception] = exceptions
-    assert "could not serialize access due to concurrent update" in str(exception)
 
     orders = session.execute(
         "SELECT orderid FROM allocations"
@@ -113,6 +112,10 @@ def test_concurrent_updates_to_version_are_not_allowed(mysql_session_factory):
         "  JOIN order_lines ON allocations.orderline_id = order_lines.id"
         " WHERE order_lines.sku=:sku",
         dict(sku=sku))
+
+    [exception] = exceptions
+    assert "Deadlock found when trying to get lock" in str(exception)
+
     assert orders.rowcount == 1
-    with unit_of_work.SqlAlchemyUnitOfWord() as uow:
+    with unit_of_work.SqlAlchemyUnitOfWork() as uow:
         uow.session.execute("SELECT 1")
