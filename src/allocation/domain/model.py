@@ -20,7 +20,7 @@ class Product:
             return batch.reference
 
         except StopIteration:
-            self.event.append(events.OutOfStock(line.sku))
+            self.events.append(events.OutOfStock(line.sku))
             return None
 
 @dataclass(unsafe_hash=True)

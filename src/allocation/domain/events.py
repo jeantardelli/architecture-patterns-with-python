@@ -4,5 +4,5 @@ class Event:
     pass
 
 @dataclass
-class OufOfStock(Event):
+class OutOfStock(Event):
     sku: str
