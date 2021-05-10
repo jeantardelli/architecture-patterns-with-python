@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-import pytest
+from allocation.domain import events
 from allocation.domain.model import Product, OrderLine, Batch, OutOfStock
 
 today = date.today()
@@ -30,7 +30,7 @@ def test_prefers_ealier_batches():
     assert medium.available_quantity == 100
     assert latest.available_quantity == 100
 
-def test_return_allocated_batch_ref():
+def test_returns_allocated_batch_ref():
     in_stock_batch = Batch("in-stock-batch-ref", "HIGHBROW-POSTER", 100, eta=None)
     shipment_batch = Batch("shipment-batch-ref", "HIGHBROW-POSTER", 100, eta=tomorrow)
     line = OrderLine("oref", "HIGHBROW-POSTER", 10)
@@ -40,13 +40,15 @@ def test_return_allocated_batch_ref():
 
     assert allocation == in_stock_batch.reference
 
-def test_raises_out_of_stock_exception_if_cannot_allocate():
+def test_records_out_of_stock_event_if_cannot_allocate():
     batch = Batch("batch1", "SMALL-FORK", 10, eta=today)
     product = Product(sku="SMALL-FORK", batches=[batch])
     product.allocate(OrderLine("order1", "SMALL-FORK", 10))
 
-    with pytest.raises(OutOfStock, match="SMALL-FORK"):
-        product.allocate(OrderLine("order2", "SMALL-FORK", 1))
+    allocation = product.allocate(OrderLine("order2", "SMALL-FORK", 1))
+
+    assert product.events[-1] == events.OutOfStock(sku="SMALL-FORK")
+    assert allocation is None
 
 def test_increments_version_number():
     line = OrderLine("oref", "SCANDI-PEN", 10)
