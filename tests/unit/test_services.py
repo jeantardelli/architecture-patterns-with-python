@@ -1,15 +1,18 @@
 import pytest
+
+from unittest import mock
 from allocation.adapters import repository
 from allocation.service_layer import services, unit_of_work
 
 class FakeRepository(repository.AbstractRepository):
     def __init__(self, products):
+        super().__init__()
         self._products = set(products)
 
-    def add(self, product):
+    def _add(self, product):
         self._products.add(product)
 
-    def get(self, sku):
+    def _get(self, sku):
         return next((p for p in self._products if p.sku == sku), None)
 
 class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
@@ -17,7 +20,7 @@ class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
         self.products = FakeRepository([])
         self.comitted = False
 
-    def commit(self):
+    def _commit(self):
         self.committed = True
 
     def rollback(self):
@@ -64,3 +67,14 @@ def test_allocate_commits():
     services.allocate("o1", "OMINOUS-MIRROR", 10, uow)
 
     assert uow.committed
+
+def test_sends_email_on_out_of_stock_error():
+    uow = FakeUnitOfWork()
+    services.add_batch("b1", "POPULAR-CURTAINS", 9, None, uow)
+
+    with mock.patch("allocation.adapters.email.send_mail") as mock_send_mail:
+        services.allocate("o1", "POPULAR-CURTAINS", 10, uow)
+
+        assert mock_send_mail.call_args == mock.call(
+            "stock@made.com",
+            f"Out of stock for POPULAR-CURTAINS")
