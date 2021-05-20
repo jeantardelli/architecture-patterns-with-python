@@ -33,7 +33,7 @@ def session(session_factory):
     return session_factory()
 
 def wait_for_mysql_to_come_up(engine):
-    deadline = time.time() + 20
+    deadline = time.time() + 30
     while time.time() < deadline:
         try:
             return engine.connect()
@@ -42,7 +42,7 @@ def wait_for_mysql_to_come_up(engine):
     pytest.fail("MySQL never came up")
 
 def wait_for_webapp_to_come_up():
-    deadline = time.time() + 20
+    deadline = time.time() + 30
     url = config.get_api_url()
     while time.time() < deadline:
         try:
