@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from . import unit_of_work
 
 logger = logging.getLogger(__name__)
-
 Message = Union[commands.Command, events.Event]
 
 def handle(message: Message,
@@ -56,7 +55,8 @@ def handle_command(
         raise
 
 EVENT_HANDLERS = {
-    events.OutOfStock: [handlers.send_out_of_stock_notification]
+    events.OutOfStock: [handlers.send_out_of_stock_notification],
+    events.Allocated: [handlers.publish_allocated_event]
 } # type: Dict[Type[events.Event], List[Callable]]
 
 

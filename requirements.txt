@@ -1,11 +1,13 @@
 # app
-
 sqlalchemy
 flask
 mysql-connector-python
+redis
 
 # tests
 pytest
 pytest-icdiff
 mypy
 requests
+tenacity
+pylint
