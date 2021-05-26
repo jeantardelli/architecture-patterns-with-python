@@ -34,11 +34,11 @@ def session_factory(in_memory_db):
 def session(session_factory):
     return session_factory()
 
-@retry(stop=stop_after_delay(30))
+@retry(stop=stop_after_delay(15))
 def wait_for_mysql_to_come_up(engine):
     return engine.connect()
 
-@retry(stop=stop_after_delay(30))
+@retry(stop=stop_after_delay(15))
 def wait_for_webapp_to_come_up():
     url = config.get_api_url()
     return requests.get(url)
@@ -79,4 +79,6 @@ def restart_redis_pubsub():
         print("skipping restart, assumes running in container")
         return
     subprocess.run(
-        ["docker-compose", "restart", "-t", "0", "redis_pubsub"])
+        ["docker-compose", "restart", "-t", "0", "redis_pubsub"],
+        check=True,
+    )

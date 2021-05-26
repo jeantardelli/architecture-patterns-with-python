@@ -35,6 +35,7 @@ class FakeUnitOfWork(unit_of_work.AbstractUnitOfWork):
     def rollback(self):
         pass
 
+
 class TestAddBatch:
     def test_for_new_product(self):
         uow = FakeUnitOfWork()
@@ -52,17 +53,25 @@ class TestAddBatch:
 
         assert "b2" in [b.reference for b in uow.products.get("GARISH-RUG").batches]
 
+
+@pytest.fixture(autouse=True)
+def fake_redis_publish():
+    with mock.patch("allocation.adapters.redis_eventpublisher.publish"):
+        yield
+
 class TestAllocate:
     def test_returns_allocation(self):
         uow = FakeUnitOfWork()
         messagebus.handle(
             commands.CreateBatch("batch01", "COMPLICATED-LAMP", 100, None), uow
         )
-        result = messagebus.handle(
+        results = messagebus.handle(
             commands.Allocate("o1", "COMPLICATED-LAMP", 10), uow
         )
 
-        assert result.pop(0) == "batch01"
+        assert results.pop(0) == "batch01"
+        [batch] = uow.products.get("COMPLICATED-LAMP").batches
+        assert batch.available_quantity == 90
 
     def test_errors_for_invalid_sku(self):
         uow = FakeUnitOfWork()
@@ -73,7 +82,7 @@ class TestAllocate:
             messagebus.handle(
                 commands.Allocate("o1", "NONEXISTENTSKU", 10), uow)
 
-    def test_allocate_commits(self):
+    def test_commits(self):
         uow = FakeUnitOfWork()
         messagebus.handle(
             commands.CreateBatch("batch01", "OMINOUS-MIRROR", 100, None), uow
