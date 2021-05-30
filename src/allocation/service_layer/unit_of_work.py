@@ -20,7 +20,6 @@ class AbstractUnitOfWork(abc.ABC):
 
     def commit(self):
         self._commit()
-        self.collect_new_events()
 
     def collect_new_events(self):
         for product in self.products.seen:
