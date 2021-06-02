@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy import (Table,
                         MetaData,
                         Column,
@@ -10,6 +11,7 @@ from sqlalchemy.orm import mapper, relationship
 
 from allocation.domain import model
 
+logger = logging.getLogger(__name__)
 metadata = MetaData()
 
 order_lines = Table(

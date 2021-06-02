@@ -1,13 +1,11 @@
-# pylint: disable=unused-argument
-
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Type. Callable, Dict, List
 from dataclasses import asdict
-from allocation.adapters import email, redis_eventpublisher
 from allocation.domain import events, model, commands
 from allocation.domain.model import OrderLine
 
 if TYPE_CHECKING:
+    from allocation.adapters import notifications
     from . import unit_of_work
 
 class InvalidSku(Exception):
@@ -20,8 +18,7 @@ def add_batch(cmd: commands.CreateBatch,
         if product is None:
             product = model.Product(cmd.sku, batches=[])
             uow.products.add(product)
-        product.batches.append(
-            model.Batch(cmd.ref, cmd.sku, cmd.qty, cmd.eta))
+        product.batches.append(model.Batch(cmd.ref, cmd.sku, cmd.qty, cmd.eta))
         uow.commit()
 
 def allocate(cmd: commands.Allocate,
@@ -37,10 +34,7 @@ def allocate(cmd: commands.Allocate,
 
 def reallocate(event: events.Deallocated,
                uow: unit_of_work.AbstractUnitOfWork):
-    with uow:
-        product = uow.products.get(sku=event.sku)
-        product.events.append(commands.Allocate(**asdict(event)))
-        uow.commit()
+    allocate(commands.Allocate(**asdict(event)), uow=uow)
 
 def change_batch_quantity(cmd: commands.ChangeBatchQuantity,
                           uow: unit_of_work.AbstractUnitOfWork):
@@ -49,15 +43,17 @@ def change_batch_quantity(cmd: commands.ChangeBatchQuantity,
         product.change_batch_quantity(ref=cmd.ref, qty=cmd.qty)
         uow.commit()
 
-def send_out_of_stock_notification(event: events.OutOfStock,
-                                   uow: unit_of_work.AbstractUnitOfWork):
-    email.send(
+def send_out_of_stock_notification(
+    event: events.OutOfStock,
+    notifications: notifications.AbstractNotifications
+):
+    notifications.send(
         "stock@made.com",
-        f"Out of stock for {event.sku}")
+        f"Out of stock for {event.sku}",
+    )
 
-def publish_allocated_event(event: events.Allocated,
-                            uow: unit_of_work.AbstractUnitOfWork):
-    redis_eventpublisher.publish("line_allocated", event)
+def publish_allocated_event(event: events.Allocated, publish: Callable):
+    publish("line_allocated", event)
 
 def add_allocation_to_read_model(event: events.Allocated,
                                  uow: unit_of_work.SqlAlchemyUnitOfWork):
@@ -82,3 +78,16 @@ def remove_allocation_from_read_model(event: events.Deallocated,
             dict(orderid=event.orderid, sku=event.sku)
         )
         uow.commit()
+
+EVENT_HANDLERS = {
+    events.OutOfStock: [send_out_of_stock_notification],
+    events.Allocated: [publish_allocated_event, add_allocation_to_read_model],
+    events.Deallocated: [remove_allocation_from_read_model, reallocate]
+} # type: Dict[Type[events.Event], List[Callable]]
+
+
+COMMAND_HANDLERS = {
+    commands.CreateBatch: add_batch,
+    commands.ChangeBatchQuantity: change_batch_quantity,
+    commands.Allocate: allocate,
+}  # type: Dict[Type[commands.Command], Callable]
