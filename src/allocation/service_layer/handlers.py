@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Type. Callable, Dict, List
+from typing import TYPE_CHECKING, Type, Callable, Dict, List
 from dataclasses import asdict
 from allocation.domain import events, model, commands
 from allocation.domain.model import OrderLine

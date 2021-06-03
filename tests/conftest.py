@@ -15,6 +15,8 @@ from tenacity import retry, stop_after_delay
 from allocation.adapters.orm import metadata, start_mappers
 from allocation import config
 
+pytest.register_assert_rewrite("tests.e2e.api_client")
+
 @pytest.fixture
 def in_memory_db():
     engine = create_engine("sqlite:///:memory:",
@@ -26,13 +28,13 @@ def in_memory_db():
 
 @pytest.fixture
 def sqlite_session_factory(in_memory_db):
-    start_mappers()
     yield sessionmaker(bind=in_memory_db)
-    clear_mappers()
 
 @pytest.fixture
-def sqlite_session(sqlite_session_factory):
-    return sqlite_session_factory()
+def mappers():
+    start_mappers()
+    yield
+    clear_mappers()
 
 @retry(stop=stop_after_delay(15))
 def wait_for_mysql_to_come_up(engine):
@@ -58,9 +60,7 @@ def mysql_db():
 
 @pytest.fixture
 def mysql_session_factory(mysql_db):
-    start_mappers()
     yield sessionmaker(bind=mysql_db)
-    clear_mappers()
 
 @pytest.fixture
 def mysql_session(mysql_session_factory):

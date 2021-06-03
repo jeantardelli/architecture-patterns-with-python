@@ -56,6 +56,7 @@ allocations_view = Table(
 )
 
 def start_mappers():
+    logger.info("Starting mappers")
     lines_mapper = mapper(model.OrderLine, order_lines)
     batches_mapper = mapper(
         model.Batch,
@@ -67,7 +68,9 @@ def start_mappers():
                 collection_class=set,
             )})
     mapper(
-        model.Product, products, properties={"batches": relationship(batches_mapper)})
+        model.Product,
+        products,
+        properties={"batches": relationship(batches_mapper)})
 
 @event.listens_for(model.Product, "load")
 def receive_load(product, _):
