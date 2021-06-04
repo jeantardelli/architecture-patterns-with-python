@@ -13,6 +13,7 @@ services:
             - MYSQL_HOST=mysql
             - MYSQL_PASSWORD=abc123
             - REDIS_HOST=redis
+            - EMAIL_HOST=mailhog
             - PYTHONWRITEBYTECODE=1
         volumes:
             - ./src:/src
@@ -29,6 +30,7 @@ services:
             - MYSQL_HOST=mysql
             - MYSQL_PASSWORD=abc123
             - REDIS_HOST=redis
+            - EMAIL_HOST=mailhog
             - FLASK_APP=allocation/entrypoints/flask_app.py
             - FLASK_DEBUG=1
             - PYTHONBUFFERED=1
@@ -56,3 +58,9 @@ services:
         image: redis:alpine
         ports:
             - "63791:6379"
+ 
+    mailhog:
+        image: mailhog/mailhog
+        ports:
+            - "11025:1025"
+            - "18025:8025"
